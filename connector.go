@@ -30,20 +30,7 @@ func Connect(cfg *Config) (driver.Connector, error) {
 	return &Connector{client}, nil
 }
 
-func (c *Connector) Conn(ctx context.Context) (driver.Conn, error) {
-	return nil, nil
-	//dc, err := c.db.Conn(ctx)
-
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//return &connect{
-	//	conn: dc,
-	//}, nil
-}
-
-func (c *Connector) Tx(ctx context.Context) (driver.Tx, error) {
+func (c *Connector) Tx(ctx context.Context) (driver.Execer, error) {
 	return nil, nil
 	//tx, err := c.db.BeginTx(ctx, &sql.TxOptions{})
 
