@@ -3,51 +3,43 @@ package mongox
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/mongo-driver/bson"
+	"github.com/mongo-driver/mongo"
+	"github.com/mongo-go-driver/mongo"
 )
 
 type Tx struct {
-	*mongo.Client
+	*mongo.Database
+	mongo.Session
 }
 
-func (tx *Tx) Exec(list ...interface{}) (interface{}, error) {
-	return tx.ExecContext(context.Background(), list)
+func (tx *Tx) Delete(ctx context.Context, i interface{}) (interface{}, error) {
+	col := tx.Collection("test")
+	return col.DeleteOne(ctx, bson.D{"id", i})
 }
 
-func (tx *Tx) ExecContext(ctx context.Context, list ...interface{}) (interface{}, error) {
-	session, err := tx.StartSession()
+func (tx *Tx) Update(ctx context.Context) (interface{}, error) {
+	col := tx.Collection("test")
+	return col.UpdateOne(ctx, bson.D{"id", i})
+}
 
-	if err != nil {
-		return nil, err
-	}
-
-	defer session.EndSession(ctx)
-
-	if err := session.StartTransaction(); err != nil {
-		return nil, err
-	}
-
-	if err := mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
-		//if err := session.StartTransaction(); err != nil {
-		//	return err
-		//}
-
-		//coll := tx.Database("db").Collection("coll")
-		//res, err := coll.InsertOne(sc, bson.D{{"x", 1}})
-		//if err != nil {
-		//	return err
-		//}
-
-		//var result bson.M
-		//if err = coll.FindOne(sc, bson.D{{"_id", res.InsertedID}}).Decode(result); err != nil {
-		//	return err
-		//}
-
-		//return session.CommitTransaction(context.Background())
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
+func (tx *Tx) Query(ctx context.Context, i interface{}) ([]interface{}, error) {
+	col := tx.Collection("test")
+	col.Find(ctx, nil)
 	return nil, nil
+}
+
+func (tx *Tx) Insert(ctx context.Context, i interface{}) (interface{}, error) {
+	col := tx.Collection("test")
+	return col.InsertOne(ctx, i)
+}
+
+func (tx *Tx) Commit(ctx context.Context) error {
+	defer tx.EndSession(ctx)
+	return tx.Session.CommitTransaction(ctx)
+}
+
+func (tx *Tx) Rollback(ctx context.Context) error {
+	defer tx.EndSession(ctx)
+	return tx.Session.AbortTransaction(ctx)
 }

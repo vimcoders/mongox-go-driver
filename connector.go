@@ -3,42 +3,36 @@ package mongox
 import (
 	"context"
 
+	"github.com/mongo-driver/mongo/options"
+	"github.com/mongo-go-driver/mongo"
 	"github.com/vimcoders/go-driver"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Config struct {
-	DriverName string
-	Usr        string
-	Pwd        string
 	Addr       string
 	DB         string
 }
 
 type Connector struct {
-	*mongo.Client
+	*mongo.Database
+	mongo.Session
 }
 
 func Connect(cfg *Config) (driver.Connector, error) {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.Addr))
-
 	if err != nil {
 		return nil, err
 	}
-
-	return &Connector{client}, nil
+	return &Connector{client.Database("test")}, nil
 }
 
-func (c *Connector) Tx(ctx context.Context) (driver.Execer, error) {
-	return nil, nil
-	//tx, err := c.db.BeginTx(ctx, &sql.TxOptions{})
-
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//return &trans{tx}, nil
+func (c *Connector) Tx(ctx context.Context) (driver.Tx, error) {
+	sess, err := c.Database.Client().StartSession()
+	if err != nil {
+		return nil, nil
+	}
+	sess.StartTransaction()
+	return &Tx{c.Database, sess}, nil
 }
 
 func (c *Connector) SetMaxOpenConns(n int) {
