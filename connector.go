@@ -3,9 +3,9 @@ package mongox
 import (
 	"context"
 
-	"github.com/mongo-driver/mongo/options"
-	"github.com/mongo-go-driver/mongo"
 	"github.com/vimcoders/go-driver"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Config struct {
@@ -15,7 +15,6 @@ type Config struct {
 
 type Connector struct {
 	*mongo.Database
-	mongo.Session
 }
 
 func Connect(cfg *Config) (driver.Connector, error) {

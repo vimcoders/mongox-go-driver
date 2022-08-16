@@ -2,10 +2,10 @@ package mongox
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/mongo-driver/bson"
-	"github.com/mongo-driver/mongo"
-	"github.com/mongo-go-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Tx struct {
@@ -13,25 +13,67 @@ type Tx struct {
 	mongo.Session
 }
 
-func (tx *Tx) Delete(ctx context.Context, i interface{}) (interface{}, error) {
-	col := tx.Collection("test")
-	return col.DeleteOne(ctx, bson.D{"id", i})
-}
-
-func (tx *Tx) Update(ctx context.Context) (interface{}, error) {
-	col := tx.Collection("test")
-	return col.UpdateOne(ctx, bson.D{"id", i})
-}
-
-func (tx *Tx) Query(ctx context.Context, i interface{}) ([]interface{}, error) {
-	col := tx.Collection("test")
-	col.Find(ctx, nil)
+func (tx *Tx) Delete(ctx context.Context, value interface{}) (interface{}, error) {
+	document, ok := value.(Document)
+	if !ok {
+		return nil, nil
+	}
+	if iface, ok := value.(Identify); ok {
+		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"_id", iface.Id()}})
+	}
+	t, v := reflect.TypeOf(value), reflect.ValueOf(value)
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Name != "id" {
+			continue
+		}
+		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"id", v.Field(i).String()}})
+	}
 	return nil, nil
 }
 
-func (tx *Tx) Insert(ctx context.Context, i interface{}) (interface{}, error) {
-	col := tx.Collection("test")
-	return col.InsertOne(ctx, i)
+func (tx *Tx) Update(ctx context.Context, value interface{}) (interface{}, error) {
+	document, ok := value.(Document)
+	if !ok {
+		return nil, nil
+	}
+	if iface, ok := value.(Identify); ok {
+		return tx.Collection(document.DocumentName()).UpdateOne(ctx, bson.D{{"id", iface.Id()}}, value)
+	}
+	t, v := reflect.TypeOf(value), reflect.ValueOf(value)
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Name != "id" {
+			continue
+		}
+		return tx.Collection(document.DocumentName()).UpdateOne(ctx, bson.D{{"id", v.Field(i).String()}}, value)
+	}
+	return nil, nil
+}
+
+func (tx *Tx) Query(ctx context.Context, value interface{}) (result []interface{}, err error) {
+	document, ok := value.(Document)
+	if !ok {
+		return nil, nil
+	}
+	cur, err := tx.Collection(document.DocumentName()).Find(ctx, bson.M{}, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		v := reflect.New(reflect.TypeOf(value)).Interface()
+		if err := cur.Decode(v); err != nil {
+			return nil, err
+		}
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func (tx *Tx) Insert(ctx context.Context, value interface{}) (interface{}, error) {
+	if document, ok := value.(Document); ok {
+		return tx.Collection(document.DocumentName()).InsertOne(ctx, value)
+	}
+	return nil, nil
 }
 
 func (tx *Tx) Commit(ctx context.Context) error {
