@@ -19,14 +19,7 @@ func (tx *Tx) Delete(ctx context.Context, value interface{}) (interface{}, error
 		return nil, nil
 	}
 	if iface, ok := value.(Identify); ok {
-		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"_id", iface.Id()}})
-	}
-	t, v := reflect.TypeOf(value), reflect.ValueOf(value)
-	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Name != "id" {
-			continue
-		}
-		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"id", v.Field(i).String()}})
+		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"_id", iface.Identify()}})
 	}
 	return nil, nil
 }
@@ -37,14 +30,7 @@ func (tx *Tx) Update(ctx context.Context, value interface{}) (interface{}, error
 		return nil, nil
 	}
 	if iface, ok := value.(Identify); ok {
-		return tx.Collection(document.DocumentName()).UpdateOne(ctx, bson.D{{"id", iface.Id()}}, value)
-	}
-	t, v := reflect.TypeOf(value), reflect.ValueOf(value)
-	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Name != "id" {
-			continue
-		}
-		return tx.Collection(document.DocumentName()).UpdateOne(ctx, bson.D{{"id", v.Field(i).String()}}, value)
+		return tx.Collection(document.DocumentName()).UpdateByID(ctx, iface.Identify(), bson.M{"$set": value})
 	}
 	return nil, nil
 }

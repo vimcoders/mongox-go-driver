@@ -1,7 +1,7 @@
 package mongox
 
 type Identify interface {
-	Id() string
+	Identify() string
 }
 
 type Document interface {
