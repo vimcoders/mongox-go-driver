@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	Addr       string
-	DB         string
+	Addr string
+	DB   string
 }
 
 type Connector struct {
@@ -32,6 +32,14 @@ func (c *Connector) Tx(ctx context.Context) (driver.Tx, error) {
 	}
 	sess.StartTransaction()
 	return &Tx{c.Database, sess}, nil
+}
+
+func (c *Connector) Execer(ctx context.Context) (driver.Execer, error) {
+	sess, err := c.Database.Client().StartSession()
+	if err != nil {
+		return nil, nil
+	}
+	return &Execer{c.Database, sess}, nil
 }
 
 func (c *Connector) SetMaxOpenConns(n int) {
