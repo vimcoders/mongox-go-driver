@@ -166,6 +166,10 @@ github.com/vimcoders/go-driver v0.0.0-20220815144104-d7644b3a1905 h1:cvFvw/Pp713
 github.com/vimcoders/go-driver v0.0.0-20220815144104-d7644b3a1905/go.mod h1:E9uBwEB7k6Zhkiq7ZV9jvZUzWk8LegyHO2RqEsjb2k0=
 github.com/vimcoders/go-driver v0.0.0-20220818022621-cfb4792b5bfc h1:eh0w7tkSRDsTF/D6URwC04P3MOZt4hkiBKtUPEDUx7s=
 github.com/vimcoders/go-driver v0.0.0-20220818022621-cfb4792b5bfc/go.mod h1:E9uBwEB7k6Zhkiq7ZV9jvZUzWk8LegyHO2RqEsjb2k0=
+github.com/vimcoders/go-driver v0.0.0-20220820132727-7d54caeaae5d h1:klqp42+DNmbbS/B+nNNSRt4OU0qK12t7VrU0c+K9pr8=
+github.com/vimcoders/go-driver v0.0.0-20220820132727-7d54caeaae5d/go.mod h1:E9uBwEB7k6Zhkiq7ZV9jvZUzWk8LegyHO2RqEsjb2k0=
+github.com/vimcoders/go-driver v0.0.0-20220820134348-043966bcfe79 h1:aVpfVgz1wcQwgjMhxTHB84INU+mEqVU3qzqksWGFrEQ=
+github.com/vimcoders/go-driver v0.0.0-20220820134348-043966bcfe79/go.mod h1:E9uBwEB7k6Zhkiq7ZV9jvZUzWk8LegyHO2RqEsjb2k0=
 github.com/xdg-go/pbkdf2 v1.0.0 h1:Su7DPu48wXMwC3bs7MCNG+z4FhcyEuz5dlvchbq0B0c=
 github.com/xdg-go/pbkdf2 v1.0.0/go.mod h1:jrpuAogTd400dnrH08LKmI/xc1MbPOebTwRqcT5RDeI=
 github.com/xdg-go/scram v1.1.1 h1:VOMT+81stJgXW3CpHyqHN3AXDYIMsx56mEFrB37Mb/E=
@@ -259,6 +263,8 @@ golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab h1:2QkjZIsXupsJbJIdSjjUOgWK3
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 h1:fqTvyMIIj+HRzMmnzr9NtpHP6uVpvB5fkHcgPDC4nu8=
 golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 h1:Sx/u41w+OwrInGdEckYmEuU5gHoGSL4QbDz3S9s6j4U=
+golang.org/x/sys v0.0.0-20220818161305-2296e01440c6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

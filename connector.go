@@ -22,7 +22,7 @@ func Connect(cfg *Config) (driver.Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Connector{client.Database("test")}, nil
+	return &Connector{client.Database(cfg.DB)}, nil
 }
 
 func (c *Connector) Tx(ctx context.Context) (driver.Tx, error) {
@@ -31,7 +31,7 @@ func (c *Connector) Tx(ctx context.Context) (driver.Tx, error) {
 		return nil, nil
 	}
 	sess.StartTransaction()
-	return &Tx{c.Database, sess}, nil
+	return NewTx(c.Database, sess), nil
 }
 
 func (c *Connector) Execer(ctx context.Context) (driver.Execer, error) {

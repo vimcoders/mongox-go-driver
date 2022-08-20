@@ -2,72 +2,35 @@ package mongox
 
 import (
 	"context"
-	"reflect"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/vimcoders/go-driver"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Tx struct {
-	*mongo.Database
-	mongo.Session
+	driver.Execer
+	commit   func(ctx context.Context) error
+	rollback func(ctx context.Context) error
 }
 
-func (tx *Tx) Delete(ctx context.Context, value interface{}) (interface{}, error) {
-	document, ok := value.(Document)
-	if !ok {
-		return nil, nil
+func NewTx(d *mongo.Database, s mongo.Session) driver.Tx {
+	return &Tx{
+		Execer: NewExecer(d, s),
+		commit: func(ctx context.Context) error {
+			return s.CommitTransaction(ctx)
+		},
+		rollback: func(ctx context.Context) error {
+			return s.AbortTransaction(ctx)
+		},
 	}
-	if iface, ok := value.(Identify); ok {
-		return tx.Collection(document.DocumentName()).DeleteOne(ctx, bson.D{{"_id", iface.Identify()}})
-	}
-	return nil, nil
-}
-
-func (tx *Tx) Update(ctx context.Context, value interface{}) (interface{}, error) {
-	document, ok := value.(Document)
-	if !ok {
-		return nil, nil
-	}
-	if iface, ok := value.(Identify); ok {
-		return tx.Collection(document.DocumentName()).UpdateByID(ctx, iface.Identify(), bson.M{"$set": value})
-	}
-	return nil, nil
-}
-
-func (tx *Tx) Query(ctx context.Context, value interface{}) (result []interface{}, err error) {
-	document, ok := value.(Document)
-	if !ok {
-		return nil, nil
-	}
-	cur, err := tx.Collection(document.DocumentName()).Find(ctx, bson.M{}, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer cur.Close(ctx)
-	for cur.Next(ctx) {
-		v := reflect.New(reflect.TypeOf(value)).Interface()
-		if err := cur.Decode(v); err != nil {
-			return nil, err
-		}
-		result = append(result, v)
-	}
-	return result, nil
-}
-
-func (tx *Tx) Insert(ctx context.Context, value interface{}) (interface{}, error) {
-	if document, ok := value.(Document); ok {
-		return tx.Collection(document.DocumentName()).InsertOne(ctx, value)
-	}
-	return nil, nil
 }
 
 func (tx *Tx) Commit(ctx context.Context) error {
-	defer tx.EndSession(ctx)
-	return tx.Session.CommitTransaction(ctx)
+	defer tx.Close(ctx)
+	return tx.commit(ctx)
 }
 
 func (tx *Tx) Rollback(ctx context.Context) error {
-	defer tx.EndSession(ctx)
-	return tx.Session.AbortTransaction(ctx)
+	defer tx.Close(ctx)
+	return tx.rollback(ctx)
 }

@@ -3,7 +3,7 @@ module github.com/vimcoders/mongox-go-driver
 go 1.18
 
 require (
-	github.com/vimcoders/go-driver v0.0.0-20220818022621-cfb4792b5bfc
+	github.com/vimcoders/go-driver v0.0.0-20220820134348-043966bcfe79
 	go.mongodb.org/mongo-driver v1.10.1
 )
 
@@ -30,7 +30,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
+	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect

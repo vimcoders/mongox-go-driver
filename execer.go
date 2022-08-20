@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/vimcoders/go-driver"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -13,38 +14,32 @@ type Execer struct {
 	mongo.Session
 }
 
+func NewExecer(d *mongo.Database, s mongo.Session) driver.Execer {
+	return &Execer{d, s}
+}
+
 func (e *Execer) Insert(ctx context.Context, doc interface{}) (interface{}, error) {
-	document, ok := doc.(Document)
-	if !ok {
-		return nil, nil
-	}
-	return e.Collection(document.DocumentName()).InsertOne(ctx, doc)
+	docName := reflect.TypeOf(doc).Elem().Name()
+	return e.Collection(docName).InsertOne(ctx, doc)
 }
 
 func (e *Execer) Delete(ctx context.Context, doc interface{}) (interface{}, error) {
-	document, ok := doc.(Document)
-	if !ok {
-		return nil, nil
-	}
+	t := reflect.TypeOf(doc).Elem()
 	if iface, ok := doc.(Identify); ok {
-		return e.Collection(document.DocumentName()).DeleteOne(ctx, bson.M{"_id": iface.Identify()})
+		return e.Collection(t.Name()).DeleteOne(ctx, bson.M{"_id": iface.Identify()})
 	}
 	return nil, nil
 }
 
-func (e *Execer) Query(ctx context.Context, doc interface{}) ([]interface{}, error) {
-	document, ok := doc.(Document)
-	if !ok {
-		return nil, nil
-	}
-	cur, err := e.Collection(document.DocumentName()).Find(ctx, bson.M{})
+func (e *Execer) Query(ctx context.Context, doc interface{}) (result []interface{}, err error) {
+	docName := reflect.TypeOf(doc).Elem().Name()
+	cur, err := e.Collection(docName).Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
-
 	}
-	defer cur.Close()
+	defer cur.Close(ctx)
 	for cur.Next(ctx) {
-		v := reflect.New(reflect.TypeOf(value)).Interface()
+		v := reflect.New(reflect.TypeOf(doc)).Interface()
 		if err := cur.Decode(v); err != nil {
 			return nil, err
 		}
@@ -54,12 +49,14 @@ func (e *Execer) Query(ctx context.Context, doc interface{}) ([]interface{}, err
 }
 
 func (e *Execer) Update(ctx context.Context, doc interface{}) (interface{}, error) {
-	document, ok := doc.(Document)
-	if !ok {
-		return nil, nil
-	}
+	docName := reflect.TypeOf(doc).Elem().Name()
 	if iface, ok := doc.(Identify); ok {
-		return e.Collection(document.DocumentName()).UpdateByID(ctx, iface.Identify(), bson.M{"$set": doc})
+		return e.Collection(docName).UpdateByID(ctx, iface.Identify(), bson.M{"$set": doc})
 	}
 	return nil, nil
+}
+
+func (e *Execer) Close(ctx context.Context) error {
+	e.EndSession(ctx)
+	return nil
 }
