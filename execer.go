@@ -32,14 +32,22 @@ func (e *Execer) Delete(ctx context.Context, doc interface{}) (interface{}, erro
 }
 
 func (e *Execer) Query(ctx context.Context, doc interface{}) (result []interface{}, err error) {
-	docName := reflect.TypeOf(doc).Elem().Name()
-	cur, err := e.Collection(docName).Find(ctx, bson.M{})
+	filter := bson.M{}
+	t, v := reflect.TypeOf(doc).Elem(), reflect.ValueOf(doc).Elem()
+	for i := 0; i < t.NumField(); i++ {
+		if ok := v.Field(i).IsZero(); ok {
+			continue
+		}
+		filter[t.Field(i).Tag.Get("bson")] = v.Field(i).Interface()
+	}
+	docName := t.Name()
+	cur, err := e.Collection(docName).Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
-		v := reflect.New(reflect.TypeOf(doc)).Interface()
+		v := reflect.New(reflect.TypeOf(doc).Elem()).Interface()
 		if err := cur.Decode(v); err != nil {
 			return nil, err
 		}
