@@ -6,11 +6,13 @@ import (
 	"github.com/vimcoders/go-driver"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Config struct {
-	Addr string
-	DB   string
+	Addr        string
+	DB          string
+	MaxPoolSize uint64
 }
 
 type Connector struct {
@@ -18,8 +20,15 @@ type Connector struct {
 }
 
 func Connect(cfg *Config) (driver.Connector, error) {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.Addr))
+	option := options.Client().ApplyURI(cfg.Addr)
+	if cfg.MaxPoolSize > 0 {
+		option.SetMaxPoolSize(cfg.MaxPoolSize)
+	}
+	client, err := mongo.Connect(context.Background(), option)
 	if err != nil {
+		return nil, err
+	}
+	if err := client.Ping(context.Background(), readpref.Primary()); err != nil {
 		return nil, err
 	}
 	return &Connector{client.Database(cfg.DB)}, nil
@@ -47,6 +56,5 @@ func (c *Connector) SetMaxOpenConns(n int) {
 }
 
 func (c *Connector) Close() (err error) {
-	return nil
-	//return c.db.Close()
+	return c.Database.Client().Disconnect(context.Background())
 }
